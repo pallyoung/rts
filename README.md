@@ -2,6 +2,8 @@
 
 A powerful Node.js runtime transformer that enables direct execution of TypeScript, JSX, TSX, and CSS files without requiring pre-compilation. Built with SWC for fast compilation and designed for seamless integration with Node.js module system.
 
+> 📖 **中文文档**: [查看中文版 README](docs/zh/README.md)
+
 ## Features
 
 - **Runtime TypeScript Compilation**: Execute `.ts` and `.tsx` files directly with SWC
