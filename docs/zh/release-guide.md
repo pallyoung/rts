@@ -69,7 +69,8 @@ pnpm run release:dry-run
 5. ✅ 使用 changeset 更新版本
 6. ✅ 发布到 npm
 7. ✅ 推送更改到 git
-8. ✅ 清理 changeset 文件
+8. ✅ 创建 git tag 用于发布
+9. ✅ 清理 changeset 文件
 
 ## 构建流程
 
@@ -115,6 +116,7 @@ dist/
 - `pnpm run release:dry-run` - 试运行（不进行实际更改）
 - `pnpm run release:build` - 构建和验证
 - `pnpm run release:test` - 仅运行测试
+- `pnpm run release:tag` - 为当前版本创建 git tag
 
 ### 选项
 
@@ -157,6 +159,13 @@ pnpm run release --skip-build
 ```bash
 # 不运行测试就发布
 pnpm run release --skip-tests
+```
+
+### 仅创建 Git Tag
+
+```bash
+# 为当前版本创建 git tag，不进行完整发布
+pnpm run release:tag
 ```
 
 ## Changeset 文件

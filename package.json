@@ -40,7 +40,8 @@
     "release": "node -r ./run-ts.js scripts/release.ts release",
     "release:dry-run": "node -r ./run-ts.js scripts/release.ts release --dry-run",
     "release:build": "node -r ./run-ts.js scripts/release.ts build",
-    "release:test": "node -r ./run-ts.js scripts/release.ts test"
+    "release:test": "node -r ./run-ts.js scripts/release.ts test",
+    "release:tag": "node -r ./run-ts.js scripts/release.ts tag"
   },
   "author": "",
   "license": "ISC",

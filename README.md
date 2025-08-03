@@ -286,6 +286,7 @@ pnpm run release
 - `pnpm run release:dry-run`: Test release without making changes
 - `pnpm run release:build`: Build and validate
 - `pnpm run release:test`: Run tests only
+- `pnpm run release:tag`: Create git tag for current version
 
 For detailed information, see the [Release Guide](docs/en/release-guide.md).
 

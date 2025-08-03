@@ -69,7 +69,8 @@ The release process will:
 5. ✅ Update versions using changeset
 6. ✅ Publish to npm
 7. ✅ Push changes to git
-8. ✅ Clean up changeset files
+8. ✅ Create git tag for the release
+9. ✅ Clean up changeset files
 
 ## Build Process
 
@@ -115,6 +116,7 @@ You need to implement the build script in `package.json`:
 - `pnpm run release:dry-run` - Dry run (no actual changes)
 - `pnpm run release:build` - Build and validate
 - `pnpm run release:test` - Run tests only
+- `pnpm run release:tag` - Create git tag for current version
 
 ### Options
 
@@ -157,6 +159,13 @@ pnpm run release --skip-build
 ```bash
 # Release without running tests
 pnpm run release --skip-tests
+```
+
+### Create Git Tag Only
+
+```bash
+# Create git tag for current version without full release
+pnpm run release:tag
 ```
 
 ## Changeset Files

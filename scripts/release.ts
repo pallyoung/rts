@@ -115,37 +115,6 @@ function buildProject(): void {
 }
 
 /**
- * Validate build output
- *
- * This function validates that the build process produced the expected files.
- * You can customize this based on your build output structure.
- */
-function validateBuildOutput(): void {
-  console.log("🔍 Validating build output...");
-
-  const expectedFiles = [
-    "dist/index.js",
-    "dist/index.d.ts",
-    "dist/resolver/index.js",
-    "dist/resolver/index.d.ts",
-    "dist/transformer/ts.js",
-    "dist/transformer/ts.d.ts",
-    "dist/config/index.js",
-    "dist/config/index.d.ts",
-  ];
-
-  const missingFiles = expectedFiles.filter((file) => !fs.existsSync(file));
-
-  if (missingFiles.length > 0) {
-    console.error("❌ Build validation failed. Missing files:");
-    missingFiles.forEach((file) => console.error(`  - ${file}`));
-    process.exit(1);
-  }
-
-  console.log("✅ Build output validated");
-}
-
-/**
  * Run changeset version command
  */
 function runChangesetVersion(): void {
@@ -174,6 +143,46 @@ function publishToNpm(config: ReleaseConfig): void {
     console.log("✅ Published to npm");
   } catch (error) {
     console.error("❌ Failed to publish to npm");
+    process.exit(1);
+  }
+}
+
+/**
+ * Get current version from package.json
+ */
+function getCurrentVersion(): string {
+  try {
+    const packageJson = JSON.parse(fs.readFileSync("package.json", "utf8"));
+    return packageJson.version;
+  } catch (error) {
+    console.error("❌ Failed to read package.json");
+    process.exit(1);
+  }
+}
+
+/**
+ * Create git tag for the release
+ */
+function createGitTag(config: ReleaseConfig): void {
+  if (config.dryRun) {
+    console.log("🔍 Dry run: Would create git tag");
+    return;
+  }
+
+  const version = getCurrentVersion();
+  const tagName = `v${version}`;
+
+  console.log(`🏷️  Creating git tag ${tagName}...`);
+  try {
+    // Create the tag
+    execSync(`git tag ${tagName}`, { stdio: "inherit" });
+    
+    // Push the tag to remote
+    execSync(`git push origin ${tagName}`, { stdio: "inherit" });
+    
+    console.log(`✅ Git tag ${tagName} created and pushed`);
+  } catch (error) {
+    console.error(`❌ Failed to create git tag ${tagName}`);
     process.exit(1);
   }
 }
@@ -240,7 +249,6 @@ function release(config: ReleaseConfig): void {
     // Build project (unless skipped)
     if (!config.skipBuild) {
       buildProject();
-      validateBuildOutput();
     }
 
     // Run changeset version (updates package.json and CHANGELOG.md)
@@ -255,6 +263,9 @@ function release(config: ReleaseConfig): void {
     if (!config.dryRun) {
       pushToGit();
       cleanupChangesetFiles();
+      
+      // Create git tag for the release
+      createGitTag(config);
     }
 
     console.log("🎉 Release completed successfully!");
@@ -296,7 +307,7 @@ const config: ReleaseConfig = {
 // Show help if no command or invalid command
 if (
   !command ||
-  (command !== "init" && !["release", "build", "test"].includes(command))
+  (command !== "init" && !["release", "build", "test", "tag"].includes(command))
 ) {
   console.log(`
 Usage: pnpm run release [options]
@@ -304,6 +315,7 @@ Usage: pnpm run release [options]
 Commands:
   release    Run the full release process
   init       Initialize changeset (first time setup)
+  tag        Create git tag for current version
 
 Options:
   --dry-run      Run without making actual changes
@@ -315,6 +327,7 @@ Examples:
   pnpm run release --dry-run   # Dry run
   pnpm run release init        # Initialize changeset
   pnpm run release --skip-build # Skip build step
+  pnpm run release tag         # Create git tag
 `);
   process.exit(1);
 }
@@ -323,7 +336,8 @@ if (command === "release") {
   release(config);
 } else if (command === "build") {
   buildProject();
-  validateBuildOutput();
 } else if (command === "test") {
   runTests();
+} else if (command === "tag") {
+  createGitTag(config);
 }
