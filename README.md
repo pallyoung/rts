@@ -252,11 +252,42 @@ npm start
 
 ### Scripts
 
-- `npm start`: Run the development server
-- `npm run lint`: Run linting
-- `npm run lint:fix`: Fix linting issues
-- `npm run check`: Run type checking
-- `npm run check:fix`: Fix type checking issues
+- `pnpm start`: Run the development server
+- `pnpm test`: Run tests
+- `pnpm test:watch`: Run tests in watch mode
+- `pnpm test:coverage`: Run tests with coverage
+- `pnpm run lint`: Run linting
+- `pnpm run lint:fix`: Fix linting issues
+- `pnpm run check`: Run type checking
+- `pnpm run check:fix`: Fix type checking issues
+- `pnpm run format`: Format code
+- `pnpm run build`: Build the project (implement as needed)
+
+### Release Process
+
+This project uses [Changesets](https://github.com/changesets/changesets) for version management and releases.
+
+**Creating a release:**
+```bash
+# 1. Create a changeset
+pnpm changeset
+
+# 2. Build and test
+pnpm run build
+pnpm test
+
+# 3. Release
+pnpm run release
+```
+
+**Available release commands:**
+- `pnpm changeset`: Create a new changeset
+- `pnpm run release`: Full release process
+- `pnpm run release:dry-run`: Test release without making changes
+- `pnpm run release:build`: Build and validate
+- `pnpm run release:test`: Run tests only
+
+For detailed information, see the [Release Guide](docs/en/release-guide.md).
 
 ## Architecture
 

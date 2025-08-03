@@ -19,7 +19,22 @@ function createTempFile(content: string, filename: string): string {
 function cleanupTempFiles(): void {
   const tempDir = path.join(__dirname, "temp");
   if (fs.existsSync(tempDir)) {
-    fs.rmSync(tempDir, { recursive: true, force: true });
+    try {
+      // Try to remove files first
+      const files = fs.readdirSync(tempDir);
+      for (const file of files) {
+        const filePath = path.join(tempDir, file);
+        try {
+          fs.unlinkSync(filePath);
+        } catch (error) {
+          // Ignore errors for individual files
+        }
+      }
+      // Then try to remove the directory
+      fs.rmdirSync(tempDir);
+    } catch (error) {
+      // Ignore errors for directory removal
+    }
   }
 }
 

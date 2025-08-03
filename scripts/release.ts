@@ -1,112 +1,80 @@
 /**
- * Release script for RTS (Runtime Transformer System)
+ * Release script for RTS (Runtime Transformer System) using Changeset
  *
- * This script automates the release process for the RTS package.
+ * This script automates the release process using @changesets/cli.
  * It handles version bumping, changelog generation, and publishing.
+ *
+ * Prerequisites:
+ * - @changesets/cli installed globally or locally
+ * - Changeset files created with `pnpm changeset`
  *
  * Usage:
  * ```bash
- * # Release a patch version (1.0.0 -> 1.0.1)
- * npm run release:patch
+ * # Create a changeset (interactive)
+ * pnpm changeset
  *
- * # Release a minor version (1.0.0 -> 1.1.0)
- * npm run release:minor
+ * # Build the project
+ * pnpm run build
  *
- * # Release a major version (1.0.0 -> 2.0.0)
- * npm run release:major
+ * # Release with changeset
+ * pnpm run release
+ *
+ * # Dry run (no actual changes)
+ * pnpm run release --dry-run
  * ```
  */
 
 import { execSync } from "child_process";
 import fs from "fs";
+import path from "path";
 
 /**
  * Release configuration
  */
 interface ReleaseConfig {
-  /** Current version from package.json */
-  currentVersion: string;
-  /** New version to release */
-  newVersion: string;
-  /** Release type: patch, minor, or major */
-  releaseType: "patch" | "minor" | "major";
   /** Whether this is a dry run (no actual changes) */
   dryRun: boolean;
+  /** Whether to skip build process */
+  skipBuild: boolean;
+  /** Whether to skip tests */
+  skipTests: boolean;
 }
 
 /**
- * Get current version from package.json
+ * Check if changeset is installed
  */
-function getCurrentVersion(): string {
-  const packageJson = JSON.parse(fs.readFileSync("package.json", "utf8"));
-  return packageJson.version;
+function checkChangesetInstalled(): void {
+  try {
+    execSync("pnpm changeset --version", { stdio: "pipe" });
+  } catch (error) {
+    console.error("❌ @changesets/cli is not installed");
+    console.error("Please install it with: pnpm add -D @changesets/cli");
+    process.exit(1);
+  }
 }
 
 /**
- * Update version in package.json
+ * Check if there are any changeset files
  */
-function updateVersion(newVersion: string): void {
-  const packageJsonPath = "package.json";
-  const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, "utf8"));
-  packageJson.version = newVersion;
-  fs.writeFileSync(
-    packageJsonPath,
-    JSON.stringify(packageJson, null, 2) + "\n",
-  );
-  console.log(`✅ Updated version to ${newVersion} in package.json`);
-}
-
-/**
- * Generate changelog entry
- */
-function generateChangelogEntry(config: ReleaseConfig): string {
-  const date = new Date().toISOString().split("T")[0];
-  return `## [${config.newVersion}] - ${date}
-
-### Added
-- New features and improvements
-
-### Changed
-- Changes in existing functionality
-
-### Fixed
-- Bug fixes and patches
-
-### Breaking Changes
-- Breaking changes (if any)
-
----
-`;
-}
-
-/**
- * Update CHANGELOG.md
- */
-function updateChangelog(config: ReleaseConfig): void {
-  const changelogPath = "CHANGELOG.md";
-  let changelog = "";
-
-  // Create changelog file if it doesn't exist
-  if (!fs.existsSync(changelogPath)) {
-    changelog = `# Changelog
-
-All notable changes to this project will be documented in this file.
-
-The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
-and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
-
-`;
-  } else {
-    changelog = fs.readFileSync(changelogPath, "utf8");
+function checkChangesetFiles(): void {
+  const changesetDir = ".changeset";
+  if (!fs.existsSync(changesetDir)) {
+    console.error("❌ .changeset directory not found");
+    console.error("Please initialize changeset with: pnpm changeset init");
+    process.exit(1);
   }
 
-  const entry = generateChangelogEntry(config);
-  const newChangelog = changelog.replace(
-    "# Changelog",
-    `# Changelog\n\n${entry}`,
-  );
-  fs.writeFileSync(changelogPath, newChangelog);
-  console.log("✅ Updated CHANGELOG.md");
+  const changesetFiles = fs
+    .readdirSync(changesetDir)
+    .filter((file) => file.endsWith(".md") && file !== "README.md");
+
+  if (changesetFiles.length === 0) {
+    console.error("❌ No changeset files found");
+    console.error("Please create changesets with: pnpm changeset");
+    process.exit(1);
+  }
+
+  console.log(`✅ Found ${changesetFiles.length} changeset(s)`);
 }
 
 /**
@@ -115,7 +83,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 function runTests(): void {
   console.log("🧪 Running tests...");
   try {
-    execSync("npm test", { stdio: "inherit" });
+    execSync("pnpm test", { stdio: "inherit" });
     console.log("✅ Tests passed");
   } catch (error) {
     console.error("❌ Tests failed");
@@ -125,20 +93,74 @@ function runTests(): void {
 
 /**
  * Build the project
+ *
+ * This function calls the build script that you will implement.
+ * The build process should:
+ * - Compile TypeScript to JavaScript
+ * - Generate type definitions
+ * - Create distribution files
+ * - Validate build output
  */
 function buildProject(): void {
   console.log("🔨 Building project...");
   try {
-    execSync("npm run build", { stdio: "inherit" });
+    // Call the build script that you will implement
+    execSync("pnpm run build", { stdio: "inherit" });
     console.log("✅ Build completed");
   } catch (error) {
     console.error("❌ Build failed");
+    console.error("Please implement the build script in package.json");
     process.exit(1);
   }
 }
 
 /**
- * Publish to npm
+ * Validate build output
+ *
+ * This function validates that the build process produced the expected files.
+ * You can customize this based on your build output structure.
+ */
+function validateBuildOutput(): void {
+  console.log("🔍 Validating build output...");
+
+  const expectedFiles = [
+    "dist/index.js",
+    "dist/index.d.ts",
+    "dist/resolver/index.js",
+    "dist/resolver/index.d.ts",
+    "dist/transformer/ts.js",
+    "dist/transformer/ts.d.ts",
+    "dist/config/index.js",
+    "dist/config/index.d.ts",
+  ];
+
+  const missingFiles = expectedFiles.filter((file) => !fs.existsSync(file));
+
+  if (missingFiles.length > 0) {
+    console.error("❌ Build validation failed. Missing files:");
+    missingFiles.forEach((file) => console.error(`  - ${file}`));
+    process.exit(1);
+  }
+
+  console.log("✅ Build output validated");
+}
+
+/**
+ * Run changeset version command
+ */
+function runChangesetVersion(): void {
+  console.log("📝 Running changeset version...");
+  try {
+    execSync("pnpm changeset version", { stdio: "inherit" });
+    console.log("✅ Version updated");
+  } catch (error) {
+    console.error("❌ Failed to update version");
+    process.exit(1);
+  }
+}
+
+/**
+ * Publish to npm using changeset
  */
 function publishToNpm(config: ReleaseConfig): void {
   if (config.dryRun) {
@@ -148,7 +170,7 @@ function publishToNpm(config: ReleaseConfig): void {
 
   console.log("📦 Publishing to npm...");
   try {
-    execSync("npm publish", { stdio: "inherit" });
+    execSync("pnpm changeset publish", { stdio: "inherit" });
     console.log("✅ Published to npm");
   } catch (error) {
     console.error("❌ Failed to publish to npm");
@@ -157,21 +179,40 @@ function publishToNpm(config: ReleaseConfig): void {
 }
 
 /**
- * Create git tag
+ * Push changes to git
  */
-function createGitTag(config: ReleaseConfig): void {
-  if (config.dryRun) {
-    console.log(`🔍 Dry run: Would create git tag v${config.newVersion}`);
-    return;
-  }
-
-  console.log(`🏷️  Creating git tag v${config.newVersion}...`);
+function pushToGit(): void {
+  console.log("📤 Pushing changes to git...");
   try {
-    execSync(`git tag v${config.newVersion}`, { stdio: "inherit" });
-    execSync(`git push origin v${config.newVersion}`, { stdio: "inherit" });
-    console.log("✅ Git tag created and pushed");
+    execSync("git add .", { stdio: "inherit" });
+    execSync('git commit -m "chore: release"', { stdio: "inherit" });
+    execSync("git push", { stdio: "inherit" });
+    console.log("✅ Changes pushed to git");
   } catch (error) {
-    console.error("❌ Failed to create git tag");
+    console.error("❌ Failed to push to git");
+    process.exit(1);
+  }
+}
+
+/**
+ * Clean up changeset files
+ */
+function cleanupChangesetFiles(): void {
+  console.log("🧹 Cleaning up changeset files...");
+  try {
+    const changesetDir = ".changeset";
+    if (fs.existsSync(changesetDir)) {
+      const files = fs
+        .readdirSync(changesetDir)
+        .filter((file) => file.endsWith(".md") && file !== "README.md");
+
+      files.forEach((file) => {
+        fs.unlinkSync(path.join(changesetDir, file));
+      });
+    }
+    console.log("✅ Changeset files cleaned up");
+  } catch (error) {
+    console.error("❌ Failed to clean up changeset files");
     process.exit(1);
   }
 }
@@ -179,69 +220,110 @@ function createGitTag(config: ReleaseConfig): void {
 /**
  * Main release function
  */
-function release(
-  releaseType: "patch" | "minor" | "major",
-  dryRun = false,
-): void {
-  const currentVersion = getCurrentVersion();
-  const [major, minor, patch] = currentVersion.split(".").map(Number);
+function release(config: ReleaseConfig): void {
+  console.log("🚀 Starting release process...");
 
-  let newVersion: string;
-  switch (releaseType) {
-    case "patch":
-      newVersion = `${major}.${minor}.${patch + 1}`;
-      break;
-    case "minor":
-      newVersion = `${major}.${minor + 1}.0`;
-      break;
-    case "major":
-      newVersion = `${major + 1}.0.0`;
-      break;
-    default:
-      throw new Error(`Invalid release type: ${releaseType}`);
-  }
-
-  const config: ReleaseConfig = {
-    currentVersion,
-    newVersion,
-    releaseType,
-    dryRun,
-  };
-
-  console.log(
-    `🚀 Starting ${releaseType} release: ${currentVersion} -> ${newVersion}`,
-  );
-  if (dryRun) {
+  if (config.dryRun) {
     console.log("🔍 DRY RUN MODE - No actual changes will be made");
   }
 
-  // Run the release process
   try {
-    if (!dryRun) {
-      updateVersion(newVersion);
-      updateChangelog(config);
+    // Check prerequisites
+    checkChangesetInstalled();
+    checkChangesetFiles();
+
+    // Run tests (unless skipped)
+    if (!config.skipTests) {
+      runTests();
     }
 
-    runTests();
-    buildProject();
-    publishToNpm(config);
-    createGitTag(config);
+    // Build project (unless skipped)
+    if (!config.skipBuild) {
+      buildProject();
+      validateBuildOutput();
+    }
 
-    console.log(`🎉 Release ${newVersion} completed successfully!`);
+    // Run changeset version (updates package.json and CHANGELOG.md)
+    if (!config.dryRun) {
+      runChangesetVersion();
+    }
+
+    // Publish to npm
+    publishToNpm(config);
+
+    // Push changes to git
+    if (!config.dryRun) {
+      pushToGit();
+      cleanupChangesetFiles();
+    }
+
+    console.log("🎉 Release completed successfully!");
   } catch (error) {
     console.error("❌ Release failed:", error);
     process.exit(1);
   }
 }
 
+/**
+ * Initialize changeset (helper function)
+ */
+function initChangeset(): void {
+  console.log("🔧 Initializing changeset...");
+  try {
+    execSync("pnpm changeset init", { stdio: "inherit" });
+    console.log("✅ Changeset initialized");
+  } catch (error) {
+    console.error("❌ Failed to initialize changeset");
+    process.exit(1);
+  }
+}
+
 // Handle command line arguments
 const args = process.argv.slice(2);
-const releaseType = args[0] as "patch" | "minor" | "major";
-const dryRun = args.includes("--dry-run");
+const command = args[0];
 
-if (!releaseType || !["patch", "minor", "major"].includes(releaseType)) {
-  console.error("Usage: npm run release <patch|minor|major> [--dry-run]");
+if (command === "init") {
+  initChangeset();
+  process.exit(0);
+}
+
+const config: ReleaseConfig = {
+  dryRun: args.includes("--dry-run"),
+  skipBuild: args.includes("--skip-build"),
+  skipTests: args.includes("--skip-tests"),
+};
+
+// Show help if no command or invalid command
+if (
+  !command ||
+  (command !== "init" && !["release", "build", "test"].includes(command))
+) {
+  console.log(`
+Usage: pnpm run release [options]
+
+Commands:
+  release    Run the full release process
+  init       Initialize changeset (first time setup)
+
+Options:
+  --dry-run      Run without making actual changes
+  --skip-build   Skip the build process
+  --skip-tests   Skip running tests
+
+Examples:
+  pnpm run release              # Full release
+  pnpm run release --dry-run   # Dry run
+  pnpm run release init        # Initialize changeset
+  pnpm run release --skip-build # Skip build step
+`);
   process.exit(1);
 }
 
-release(releaseType, dryRun);
+if (command === "release") {
+  release(config);
+} else if (command === "build") {
+  buildProject();
+  validateBuildOutput();
+} else if (command === "test") {
+  runTests();
+}
