@@ -1,0 +1,35 @@
+{
+  "projectName": "RTS (Runtime Transformer System)",
+  "packageManager": "pnpm",
+  "language": "TypeScript",
+  "testingFramework": "AVA",
+  "lintingTool": "Biome",
+  "documentationLanguage": ["English", "Chinese"],
+  "fileStructure": {
+    "source": "src/",
+    "tests": "test/",
+    "docs": "docs/",
+    "scripts": "scripts/",
+    "tempFiles": "test/temp/"
+  },
+  "conventions": {
+    "comments": "English only",
+    "commitMessages": "English only",
+    "documentation": "Bilingual (English and Chinese)",
+    "fileNaming": "kebab-case",
+    "exports": "Named exports preferred",
+    "testFiles": "*.test.ts"
+  },
+  "commands": {
+    "install": "pnpm install",
+    "add": "pnpm add",
+    "addDev": "pnpm add -D",
+    "remove": "pnpm remove",
+    "test": "pnpm test",
+    "testWatch": "pnpm run test:watch",
+    "testCoverage": "pnpm run test:coverage",
+    "lint": "pnpm run lint",
+    "lintFix": "pnpm run lint:fix",
+    "format": "pnpm run format"
+  }
+}

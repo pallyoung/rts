@@ -14,15 +14,21 @@ import type { TransformerHook } from "../resolver";
  * - Decorator metadata preservation
  * - ES2016 target for broad compatibility
  * - CommonJS module format for Node.js
+ * - JSX support for TSX files
  */
 const DEFAULT_SWC_CONFIG: Options = {
   jsc: {
     parser: {
       syntax: "typescript",
+      tsx: true,
+      decorators: true,
     },
     transform: {
       legacyDecorator: true,
       decoratorMetadata: true,
+      react: {
+        runtime: "automatic",
+      },
     },
     target: "es2016",
     loose: false,
@@ -69,7 +75,13 @@ export const TSHook: TransformerHook = {
    * @returns Transformed JavaScript code
    */
   hook: (code: string) => {
-    const result = transformSync(code, DEFAULT_SWC_CONFIG);
-    return result.code;
+    try {
+      const result = transformSync(code, DEFAULT_SWC_CONFIG);
+      return result.code;
+    } catch (error) {
+      // If transformation fails, return the original code
+      console.warn("SWC transformation failed:", error);
+      return code;
+    }
   },
 };

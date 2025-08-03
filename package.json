@@ -25,7 +25,9 @@
     "start": "node -r ./run-ts.js src/bin/index.ts",
     "dev": "node -r ./run-ts.js src/bin/index.ts",
     "build": "echo 'Build script - implement as needed'",
-    "test": "echo 'Test script - implement as needed'",
+    "test": "ava",
+    "test:watch": "ava --watch",
+    "test:coverage": "c8 ava",
     "lint": "biome lint .",
     "lint:fix": "biome lint --write .",
     "check": "biome check .",
@@ -43,6 +45,8 @@
   },
   "devDependencies": {
     "@biomejs/biome": "^2.1.3",
-    "@types/node": "^24.1.0"
+    "@types/node": "^24.1.0",
+    "ava": "^6.4.1",
+    "c8": "^10.1.3"
   }
 }

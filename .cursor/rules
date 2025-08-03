@@ -1,0 +1,254 @@
+# RTS Project Cursor Rules
+
+## Project Overview
+This is a Node.js runtime transformer system (RTS) that enables direct execution of TypeScript, JSX, TSX, and CSS files without requiring pre-compilation. Built with SWC for fast compilation and designed for seamless integration with Node.js module system.
+
+## Package Management
+- **Use pnpm as the package manager**
+- Always use `pnpm install` instead of `npm install`
+- Use `pnpm add <package>` for adding dependencies
+- Use `pnpm add -D <package>` for adding dev dependencies
+- Use `pnpm remove <package>` for removing dependencies
+- Use `pnpm run <script>` for running scripts
+
+## Code Style and Comments
+- **All comments must be in English**
+- Use JSDoc style comments for functions and classes
+- Include comprehensive parameter descriptions
+- Add usage examples in comments where appropriate
+- Use clear, descriptive variable and function names
+- Follow TypeScript best practices
+
+## Commit Messages
+- **All commit messages must be in English**
+- Use conventional commit format: `type(scope): description`
+- Examples:
+  - `feat(resolver): add module alias support`
+  - `fix(transformer): handle JSX syntax correctly`
+  - `docs(readme): update installation instructions`
+  - `test(integration): add end-to-end test cases`
+
+## File Organization
+
+### Source Code (`src/`)
+- Main entry point: `src/index.ts`
+- Module resolver: `src/resolver/index.ts`
+- TypeScript transformer: `src/transformer/ts.ts`
+- Configuration utilities: `src/config/index.ts`
+- Register system: `src/register/index.ts`
+- Binary entry: `src/bin/index.ts`
+
+### Documentation (`docs/`)
+- **All documentation should be bilingual (Chinese and English)**
+- Place all documentation files in `docs/` directory
+- Use `.md` extension for markdown files
+- Include both Chinese and English versions when possible
+- Structure: `docs/en/` for English, `docs/zh/` for Chinese
+
+### Tests (`test/`)
+- All test files go in `test/` directory
+- Use AVA as the testing framework
+- Test file naming: `*.test.ts`
+- **Temporary files for tests should be placed in `test/temp/`**
+- Test structure:
+  - `test/index.test.ts` - Main functionality tests
+  - `test/resolver.test.ts` - Module resolver tests
+  - `test/transformer.test.ts` - Transformer tests
+  - `test/config.test.ts` - Configuration tests
+  - `test/register.test.ts` - Register system tests
+  - `test/integration.test.ts` - Integration tests
+
+### Scripts (`scripts/`)
+- Build and utility scripts
+- Release automation: `scripts/release.ts`
+
+## Development Workflow
+
+### Adding New Features
+1. Create feature branch: `git checkout -b feature/feature-name`
+2. Write code with English comments
+3. Add comprehensive tests in `test/` directory
+4. Update documentation in `docs/` directory (bilingual)
+5. Commit with English message
+6. Create pull request
+
+### Testing
+- Run tests: `pnpm test`
+- Run tests in watch mode: `pnpm run test:watch`
+- Run tests with coverage: `pnpm run test:coverage`
+- All tests must pass before merging
+
+### Documentation
+- Update README.md for major changes
+- Add detailed documentation in `docs/` directory
+- Include both Chinese and English versions
+- Use clear, structured markdown format
+
+## Code Quality
+
+### TypeScript
+- Use strict TypeScript configuration
+- Define proper interfaces and types
+- Use ES modules (`import`/`export`)
+- Avoid `export default` unless specifically requested
+- Use PascalCase for class names
+- Use camelCase for functions and variables
+
+### Error Handling
+- Implement proper error handling
+- Use try-catch blocks where appropriate
+- Provide meaningful error messages
+- Log errors for debugging
+
+### Performance
+- Optimize for runtime performance
+- Use caching where appropriate
+- Minimize file system operations
+- Consider memory usage for large files
+
+## Configuration Files
+
+### AVA Configuration (`ava.config.js`)
+- Configure for TypeScript testing
+- Set appropriate timeouts
+- Enable verbose output for debugging
+
+### Biome Configuration (`biome.json`)
+- Use Biome for linting and formatting
+- Configure for TypeScript and JavaScript
+- Set up consistent code style rules
+
+### Package Configuration (`package.json`)
+- Define all necessary scripts
+- Use pnpm for dependency management
+- Include proper TypeScript configuration
+
+## Testing Guidelines
+
+### Test Structure
+- Use descriptive test names
+- Test both success and failure scenarios
+- Clean up resources after tests
+- Use temporary files in `test/temp/` directory
+- Mock external dependencies when appropriate
+
+### Test Coverage
+- Aim for high test coverage
+- Test edge cases and error conditions
+- Include integration tests for end-to-end scenarios
+- Test all public APIs
+
+## Release Process
+
+### Version Management
+- Use semantic versioning
+- Update version in `package.json`
+- Generate changelog entries
+- Create git tags for releases
+
+### Release Scripts
+- Use `pnpm run release:patch` for bug fixes
+- Use `pnpm run release:minor` for new features
+- Use `pnpm run release:major` for breaking changes
+- Use `pnpm run release:dry-run` for testing release process
+
+## File Naming Conventions
+
+### Source Files
+- Use kebab-case for file names
+- Use `.ts` extension for TypeScript files
+- Use `.tsx` extension for TypeScript JSX files
+- Use `.js` extension for JavaScript files
+
+### Test Files
+- Use `*.test.ts` for test files
+- Match test file names with source file names
+- Use descriptive test file names
+
+### Documentation Files
+- Use `.md` extension for markdown files
+- Use descriptive file names
+- Include language suffix for bilingual docs (e.g., `readme-en.md`, `readme-zh.md`)
+
+## Import/Export Conventions
+
+### ES Modules
+- Use named exports by default
+- Only use `export default` when specifically requested
+- Use explicit import paths
+- Avoid relative imports when possible
+
+### Module Organization
+- Group related functionality in modules
+- Use index files for module exports
+- Keep modules focused and cohesive
+
+## Error Messages and Logging
+
+### Error Messages
+- Use clear, descriptive error messages
+- Include context information
+- Provide actionable suggestions
+- Use English for all error messages
+
+### Logging
+- Use appropriate log levels
+- Include relevant context
+- Avoid sensitive information in logs
+- Use structured logging when possible
+
+## Security Considerations
+
+### Code Security
+- Validate all inputs
+- Sanitize file paths
+- Handle file system operations safely
+- Avoid code injection vulnerabilities
+
+### Dependencies
+- Keep dependencies updated
+- Use pnpm audit for security checks
+- Review dependency changes
+- Prefer well-maintained packages
+
+## Performance Guidelines
+
+### Runtime Performance
+- Optimize for fast compilation
+- Use efficient algorithms
+- Minimize memory allocations
+- Cache frequently accessed data
+
+### Build Performance
+- Optimize build times
+- Use incremental compilation
+- Minimize unnecessary operations
+- Profile performance bottlenecks
+
+## Accessibility and Usability
+
+### Code Accessibility
+- Write self-documenting code
+- Use clear variable names
+- Provide comprehensive documentation
+- Include usage examples
+
+### User Experience
+- Provide clear error messages
+- Include helpful documentation
+- Make configuration simple
+- Support common use cases
+
+## Maintenance
+
+### Code Maintenance
+- Keep code clean and organized
+- Remove unused code
+- Update dependencies regularly
+- Fix issues promptly
+
+### Documentation Maintenance
+- Keep documentation up to date
+- Update examples when APIs change
+- Maintain bilingual documentation
+- Review and improve documentation regularly 

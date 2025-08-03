@@ -44,9 +44,6 @@ const registerHooksPolyfill = () => {
 
   // Store the original resolve filename function
   const originalResolveFilename = (Module as any)._resolveFilename;
-  const originalResolve = (specifier: string, context: ResolveHookContext) => {
-    return originalResolveFilename(specifier, context);
-  };
 
   /**
    * Recursive resolve function that chains through all registered hooks
@@ -65,32 +62,22 @@ const registerHooksPolyfill = () => {
     context: ResolveHookContext,
     index?: number,
   ) => ReturnType<ResolveHookSync> = (specifier, context, index = 0) => {
-    const currentResolve =
-      index >= hooks.length
-        ? originalResolve
-        : (specifier, context) => {
-            if (hooks[index].resolve) {
-              return hooks[index].resolve(
-                specifier,
-                context,
-                (specifier, context) => {
-                  return resolve(
-                    specifier,
-                    context as ResolveHookContext,
-                    index + 1,
-                  );
-                },
-              );
-            }
-            return resolve(specifier, context, index + 1);
-          };
-
-    return currentResolve(specifier, context);
+    if (index < hooks.length) {
+      return hooks[index].resolve
+        ? hooks[index].resolve(specifier, context, (specifier, context) => {
+            return resolve(specifier, context as ResolveHookContext, index + 1);
+          })
+        : resolve(specifier, context, index + 1);
+    }
+    return {
+      url: specifier,
+    };
   };
 
   // Override the original resolve filename function with our chained version
   (Module as any)._resolveFilename = (specifier, context) => {
-    return resolve(specifier, context);
+    const url = resolve(specifier, context).url;
+    return originalResolveFilename.apply(this, [url, context]);
   };
 
   /**

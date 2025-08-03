@@ -134,10 +134,7 @@ export class ModuleResolver {
       const origResolve = (Module as any)._resolveFilename;
       (Module as any)._resolveFilename = (specifier, context) => {
         const { url } = this.resolve(specifier, context);
-        if (url) {
-          return url;
-        }
-        return origResolve(specifier, context);
+        return origResolve.apply(this, [url ?? specifier, context]);
       };
 
       // Register custom loaders for supported file extensions
