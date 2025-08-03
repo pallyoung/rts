@@ -9,8 +9,19 @@
   },
   "publishConfig": {
     "main": "dist/cjs/index.js",
-    "bin": "dist/cjs/bin/index.js"
+    "bin": {
+      "rts": "dist/cjs/bin/index.js"
+    }
   },
+  "files": [
+    "dist",
+    "src",
+    "package.json",
+    "README.md",
+    "docs",
+    "LICENSE",
+    "CHANGELOG.md"
+  ],
   "keywords": [
     "nodejs",
     "runtime",
@@ -43,7 +54,7 @@
     "release:test": "node -r ./run-ts.js scripts/release.ts test",
     "release:tag": "node -r ./run-ts.js scripts/release.ts tag"
   },
-  "author": "",
+  "author": "Spencer",
   "license": "ISC",
   "dependencies": {
     "@swc/core": "^1.13.3"

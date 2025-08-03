@@ -24,9 +24,59 @@
  * ```
  */
 
+import { transformSync } from "@swc/core";
 import { execSync } from "child_process";
 import fs from "fs";
-import path from "path";
+import path, { join } from "path";
+
+const build = (src?: string, dist?: string) => {
+  const type = "commonjs";
+  try {
+    src = src ?? join(process.cwd(), "src");
+    dist = dist ?? join(process.cwd(), "dist/cjs");
+    if (!fs.existsSync(dist)) {
+      fs.mkdirSync(dist, { recursive: true });
+    }
+    const files = fs.readdirSync(src);
+    files.forEach((file) => {
+      const filePath = path.join(src!, file);
+      if (fs.statSync(filePath).isDirectory()) {
+        build(filePath, join(dist!, file));
+      } else {
+        const content = fs.readFileSync(filePath, "utf8");
+        if (file.endsWith(".ts")) {
+          const result = transformSync(content, {
+            jsc: {
+              target: "es2020",
+              parser: {
+                syntax: "typescript",
+              },
+              transform: {
+                legacyDecorator: true,
+                decoratorMetadata: true,
+              },
+            },
+            module: {
+              type,
+            },
+          });
+          fs.writeFileSync(
+            join(dist!, file.replace(".ts", ".js")),
+            result.code,
+            "utf8",
+          );
+        } else {
+          fs.copyFileSync(filePath, join(dist!, file));
+        }
+      }
+    });
+    console.log("✅ Build completed");
+  } catch (error) {
+    console.error("❌ Build failed");
+    console.error(error);
+    process.exit(1);
+  }
+};
 
 /**
  * Release configuration
@@ -105,7 +155,7 @@ function buildProject(): void {
   console.log("🔨 Building project...");
   try {
     // Call the build script that you will implement
-    execSync("pnpm run build", { stdio: "inherit" });
+    build();
     console.log("✅ Build completed");
   } catch (error) {
     console.error("❌ Build failed");
@@ -176,10 +226,10 @@ function createGitTag(config: ReleaseConfig): void {
   try {
     // Create the tag
     execSync(`git tag ${tagName}`, { stdio: "inherit" });
-    
+
     // Push the tag to remote
     execSync(`git push origin ${tagName}`, { stdio: "inherit" });
-    
+
     console.log(`✅ Git tag ${tagName} created and pushed`);
   } catch (error) {
     console.error(`❌ Failed to create git tag ${tagName}`);
@@ -251,19 +301,16 @@ function release(config: ReleaseConfig): void {
       buildProject();
     }
 
-    // Run changeset version (updates package.json and CHANGELOG.md)
     if (!config.dryRun) {
+      // Run changeset version (updates package.json and CHANGELOG.md)
       runChangesetVersion();
-    }
 
-    // Publish to npm
-    publishToNpm(config);
-
-    // Push changes to git
-    if (!config.dryRun) {
+      // Publish to npm
+      publishToNpm(config);
+      // Push changes to git
       pushToGit();
       cleanupChangesetFiles();
-      
+
       // Create git tag for the release
       createGitTag(config);
     }
