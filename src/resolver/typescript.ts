@@ -1,5 +1,5 @@
 import swc, { type Options } from "@swc/core";
-import type { TransformerHook } from "./resolver";
+import type { TransformerHook } from ".";
 
 /**
  * Default SWC configuration for TypeScript transformation

@@ -9,7 +9,6 @@
   },
   "publishConfig": {
     "main": "dist/cjs/index.js",
-    "module": "dist/esm/index.js",
     "bin": "dist/cjs/bin/index.js"
   },
   "keywords": [
@@ -24,10 +23,18 @@
   ],
   "scripts": {
     "start": "node -r ./run-ts.js src/bin/index.ts",
+    "dev": "node -r ./run-ts.js src/bin/index.ts",
+    "build": "echo 'Build script - implement as needed'",
+    "test": "echo 'Test script - implement as needed'",
     "lint": "biome lint .",
     "lint:fix": "biome lint --write .",
     "check": "biome check .",
-    "check:fix": "biome check --write ."
+    "check:fix": "biome check --write .",
+    "format": "biome format --write .",
+    "release:patch": "node -r ./run-ts.js scripts/release.ts patch",
+    "release:minor": "node -r ./run-ts.js scripts/release.ts minor",
+    "release:major": "node -r ./run-ts.js scripts/release.ts major",
+    "release:dry-run": "node -r ./run-ts.js scripts/release.ts patch --dry-run"
   },
   "author": "",
   "license": "ISC",
