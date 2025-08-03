@@ -13,7 +13,6 @@ test/
 ├── resolver.test.ts        # Module resolver tests
 ├── transformer.test.ts     # Transformer tests
 ├── config.test.ts          # Configuration tests
-├── register.test.ts        # Register system tests
 ├── integration.test.ts     # Integration tests
 └── README.md              # This file
 ```
@@ -22,10 +21,10 @@ test/
 
 ### `index.test.ts`
 Tests for the main RTS functionality including:
-- `registerRTS` function behavior
-- Configuration handling
-- Module registration and cleanup
-- Error handling scenarios
+- `registerRTS` function behavior with unified ModuleResolver approach
+- Configuration handling (aliases and transformers)
+- Cleanup function functionality and idempotency
+- Edge cases and error handling
 
 ### `resolver.test.ts`
 Tests for the ModuleResolver class including:
@@ -50,17 +49,9 @@ Tests for configuration utilities including:
 - Error handling for invalid files
 - Default value handling
 
-### `register.test.ts`
-Tests for the Node.js module hook registration system including:
-- **Hook Registration**: Resolve and load hook setup
-- **Custom Resolution**: Module path redirection
-- **Hook Cleanup**: Proper deregistration
-- **Multiple Registrations**: Handling multiple hook sets
-- **Edge Cases**: Empty hooks and error conditions
-
 ### `integration.test.ts`
 End-to-end integration tests including:
-- Complete RTS workflow
+- Complete RTS workflow with unified architecture
 - Real file system operations
 - Module loading scenarios
 - Performance benchmarks
@@ -98,6 +89,7 @@ The test suite is configured in `ava.config.js`:
 
 ### Core Functionality Coverage
 
+- ✅ **Main RTS API**: `registerRTS` function with unified ModuleResolver
 - ✅ **Module Resolution**: Alias handling, path resolution
 - ✅ **Transformer System**: Code transformation, file type handling
 - ✅ **Hook Management**: Registration, cleanup, error handling
@@ -111,6 +103,15 @@ The test suite is configured in `ava.config.js`:
 - **Robust**: Tests handle edge cases and error conditions
 - **Fast**: Tests complete within reasonable time limits
 - **Clean**: Tests clean up resources properly
+
+## Architecture Overview
+
+The RTS system uses a unified architecture where:
+- `registerRTS` function provides the main API
+- `ModuleResolver` handles both module resolution and code transformation
+- Built-in `TSHook` transformer handles TypeScript/TSX files
+- Custom transformers can be added for additional file types
+- All functionality is centralized for better maintainability
 
 ## Temporary Files
 

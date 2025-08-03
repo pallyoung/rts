@@ -22,21 +22,25 @@ export interface RTSOptions {
  * including TypeScript (.ts), TypeScript JSX (.tsx), JavaScript (.js), JSX (.jsx),
  * and CSS files at runtime without requiring pre-compilation.
  *
+ * The function uses a centralized ModuleResolver instance that handles both
+ * module resolution and code transformation in a unified way.
+ *
  * Features:
  * - Runtime TypeScript compilation using SWC
- * - Module alias resolution
- * - Extensible transformer system
+ * - Module alias resolution with flexible path mapping
+ * - Extensible transformer system for custom file types
  * - Node.js version compatibility (supports both <24 and >=24)
+ * - Automatic cleanup and resource management
  *
  * @param options - Optional configuration for RTS system
  * @returns A cleanup function that can be called to deregister all hooks
  *
  * @example
  * ```typescript
- * // Basic usage
+ * // Basic usage with default TypeScript transformer
  * const cleanup = registerRTS();
  *
- * // With custom aliases
+ * // With custom aliases for cleaner imports
  * const cleanup = registerRTS({
  *   alias: {
  *     '@components': './src/components',
@@ -44,12 +48,23 @@ export interface RTSOptions {
  *   }
  * });
  *
- * // With custom transformers
+ * // With custom transformers for additional file types
+ * const customCSSHook: TransformerHook = {
+ *   exts: ['.css'],
+ *   hook: (code: string) => `export default ${JSON.stringify(code)};`
+ * };
+ * 
  * const cleanup = registerRTS({
- *   transformers: [customCSSHook, customJSXHook]
+ *   transformers: [customCSSHook]
  * });
  *
- * // Cleanup when done
+ * // With both aliases and custom transformers
+ * const cleanup = registerRTS({
+ *   alias: { '@styles': './src/styles' },
+ *   transformers: [customCSSHook]
+ * });
+ *
+ * // Cleanup when done (idempotent - safe to call multiple times)
  * cleanup();
  * ```
  */
@@ -69,7 +84,7 @@ export const registerRTS = (options?: RTSOptions): (() => void) => {
   // Register the resolver hooks with Node.js module system
   resolver.register();
 
-  // Return cleanup function
+  // Return cleanup function that reverts all registered hooks
   return () => {
     resolver.revert();
   };

@@ -116,10 +116,7 @@ export class ModuleResolver {
       this.revertRegister = Module.registerHooks({
         resolve: (specifier, context, nextResolve) => {
           const { url } = this.resolve(specifier, context);
-          if (url) {
-            return { url };
-          }
-          return nextResolve(specifier, context);
+          return nextResolve(url ?? specifier, context);
         },
         load: (url, parent, nextLoad) => {
           const result = this.load(url);
