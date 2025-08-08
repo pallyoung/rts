@@ -1,51 +1,14 @@
-import fs from "node:fs";
+import type { TransformerHook } from "../resolver";
 
 /**
- * Load configuration from a JSON file
- *
- * This function reads a JSON configuration file and parses it into a JavaScript object.
- * It's designed to handle configuration files for the RTS system.
- *
- * @param file - Path to the configuration file
- * @returns Parsed configuration object
- * @throws {Error} If the file cannot be read or parsed
- *
- * @example
- * ```typescript
- * const config = loadConfig('./rts.config.json');
- * console.log(config.aliases); // { '@components': './src/components' }
- * ```
+ * Configuration options for the RTS (Runtime Transformer System)
  */
-export const loadConfig = (file: string) => {
-  const config = fs.readFileSync(file, "utf8");
-  return JSON.parse(config);
-};
-
-/**
- * Load configuration file with error handling
- *
- * This function provides a safe way to load configuration files with proper
- * error handling. It wraps the loadConfig function to catch and handle
- * common errors like missing files or invalid JSON.
- *
- * @param file - Path to the configuration file
- * @returns Configuration object
- * @throws {Error} If the file cannot be loaded or parsed
- *
- * @example
- * ```typescript
- * try {
- *   const config = loadConfigFile('./rts.config.json');
- *   // Use config
- * } catch (error) {
- *   console.error('Failed to load config:', error.message);
- * }
- * ```
- */
-export const loadConfigFile = (file: string) => {
-  const config = loadConfig(file);
-  return config;
-};
+export interface RTSOptions {
+  /** Module alias mapping for path resolution */
+  alias?: Record<string, string[] | string>;
+  /** Custom transformers for additional file type support */
+  transformers?: TransformerHook[];
+}
 
 /**
  * Deep merge two configuration objects
@@ -80,13 +43,29 @@ export const loadConfigFile = (file: string) => {
  * // }
  * ```
  */
-export const mergeConfig = (oldConfig: any, newConfig: any) => {
+export function mergeConfig(
+  oldConfig: Partial<RTSOptions>,
+  newConfig: Partial<RTSOptions>,
+): RTSOptions {
+  if (!newConfig || typeof newConfig !== "object")
+    return oldConfig as RTSOptions;
+  const target: RTSOptions = { ...oldConfig };
   for (const key in newConfig) {
-    if (newConfig[key] instanceof Object) {
-      oldConfig[key] = mergeConfig(oldConfig[key], newConfig[key]);
-    } else {
-      oldConfig[key] = newConfig[key];
+    switch (key) {
+      case "alias":
+        target.alias = { ...(target.alias ?? {}), ...(newConfig.alias ?? {}) };
+        break;
+      case "transformers":
+        target.transformers = [
+          ...(target.transformers ?? []),
+          ...(newConfig.transformers ?? []),
+        ];
+        break;
+      default:
+        target[key] = newConfig[key];
     }
   }
-  return oldConfig;
-};
+  return target;
+}
+
+export { loadConfigFromCwd } from "./loader";

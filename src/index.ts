@@ -1,19 +1,10 @@
-import { ModuleResolver, type TransformerHook } from "./resolver";
+import { loadConfigFromCwd, mergeConfig, type RTSOptions } from "./config";
+import { ModuleResolver } from "./resolver";
 import { TSHook } from "./transformer/ts";
 
 // Create a module resolver instance for handling module resolution
 // This resolver will handle TypeScript, JSX, TSX, and CSS file transformations
 const resolver = new ModuleResolver([TSHook]);
-
-/**
- * Configuration options for the RTS (Runtime Transformer System)
- */
-export interface RTSOptions {
-  /** Module alias mapping for path resolution */
-  alias?: Record<string, string[] | string>;
-  /** Custom transformers for additional file type support */
-  transformers?: TransformerHook[];
-}
 
 /**
  * Register RTS (Runtime Transformer System) hooks for Node.js module loading
@@ -53,7 +44,7 @@ export interface RTSOptions {
  *   exts: ['.css'],
  *   hook: (code: string) => `export default ${JSON.stringify(code)};`
  * };
- * 
+ *
  * const cleanup = registerRTS({
  *   transformers: [customCSSHook]
  * });
@@ -69,22 +60,34 @@ export interface RTSOptions {
  * ```
  */
 export const registerRTS = (options?: RTSOptions): (() => void) => {
-  // Configure module aliases if provided
-  if (options?.alias) {
-    resolver.setAlias(options.alias);
+  //  default config
+  const base: RTSOptions = {};
+
+  //  load config from cwd
+  const fileConfig = loadConfigFromCwd() as Partial<RTSOptions> | undefined;
+
+  //  merge config
+  const finalOptions = mergeConfig(
+    mergeConfig({ ...base }, fileConfig ?? {}),
+    options ?? {},
+  ) as RTSOptions;
+
+  //  apply alias
+  if (finalOptions.alias) {
+    resolver.setAlias(finalOptions.alias);
   }
 
-  // Add custom transformers if provided
-  if (options?.transformers) {
-    for (const transformer of options.transformers) {
+  //  apply transformers
+  if (finalOptions.transformers) {
+    for (const transformer of finalOptions.transformers) {
       resolver.addTransformer(transformer);
     }
   }
 
-  // Register the resolver hooks with Node.js module system
+  //  register hooks
   resolver.register();
 
-  // Return cleanup function that reverts all registered hooks
+  //  return cleanup function
   return () => {
     resolver.revert();
   };
