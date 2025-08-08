@@ -8,10 +8,15 @@
     "rts": "src/bin/index.ts"
   },
   "publishConfig": {
+    "registry": "https://registry.npmjs.org/",
     "main": "dist/cjs/index.js",
     "bin": {
       "rts": "dist/cjs/bin/index.js"
     }
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/pallyoung/rts.git"
   },
   "files": [
     "dist",
