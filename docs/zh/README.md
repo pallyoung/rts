@@ -15,15 +15,35 @@
 ## 安装
 
 ```bash
-npm install rts
+npm install rts.js
 ```
 
 ## 快速开始
 
+### 使用 Register 模块（推荐）
+
+使用 RTS 最简单的方式是通过 register 模块：
+
+```bash
+# 直接运行 TypeScript 文件
+node -r rts.js/register app.ts
+
+# 或在 package.json 脚本中使用
+```
+
+```json
+{
+  "scripts": {
+    "start": "node -r rts.js/register src/index.ts",
+    "dev": "node -r rts.js/register src/dev.ts"
+  }
+}
+```
+
 ### 基本用法
 
 ```typescript
-import { registerRTS } from 'rts';
+import { registerRTS } from 'rts.js';
 
 // 注册 RTS 钩子
 const cleanup = registerRTS();
@@ -38,7 +58,7 @@ cleanup();
 ### 使用模块别名
 
 ```typescript
-import { registerRTS } from 'rts';
+import { registerRTS } from 'rts.js';
 
 const cleanup = registerRTS({
   alias: {
@@ -56,8 +76,8 @@ import { formatDate } from '@utils/date';
 ### 自定义转换器
 
 ```typescript
-import { registerRTS } from 'rts';
-import type { TransformerHook } from 'rts';
+import { registerRTS } from 'rts.js';
+import type { TransformerHook } from 'rts.js;
 
 // 创建自定义 CSS 转换器
 const CSSHook: TransformerHook = {
@@ -152,7 +172,7 @@ RTS 支持较旧和较新的 Node.js 版本：
 ```typescript
 // app.ts
 import express from 'express';
-import { registerRTS } from 'rts';
+import { registerRTS } from 'rts.js';
 
 const cleanup = registerRTS({
   alias: {
@@ -227,27 +247,6 @@ export const Button: React.FC<ButtonProps> = ({
   background-color: #6c757d;
   color: white;
 }
-```
-
-## 开发
-
-### 前置要求
-
-- Node.js >=16
-- npm 或 yarn
-
-### 设置
-
-```bash
-# 克隆仓库
-git clone https://github.com/your-org/rts.git
-cd rts
-
-# 安装依赖
-npm install
-
-# 开始开发
-npm start
 ```
 
 ### 脚本

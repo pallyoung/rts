@@ -17,15 +17,35 @@ A powerful Node.js runtime transformer that enables direct execution of TypeScri
 ## Installation
 
 ```bash
-npm install rts
+npm install rts.js
 ```
 
 ## Quick Start
 
+### Using Register Module (Recommended)
+
+The easiest way to use RTS is with the register module:
+
+```bash
+# Run TypeScript files directly
+node -r rts.js/register app.ts
+
+# Or use in package.json scripts
+```
+
+```json
+{
+  "scripts": {
+    "start": "node -r rts.js/register src/index.ts",
+    "dev": "node -r rts.js/register src/dev.ts"
+  }
+}
+```
+
 ### Basic Usage
 
 ```typescript
-import { registerRTS } from 'rts';
+import { registerRTS } from 'rts.js';
 
 // Register RTS hooks
 const cleanup = registerRTS();
@@ -40,7 +60,7 @@ cleanup();
 ### With Module Aliases
 
 ```typescript
-import { registerRTS } from 'rts';
+import { registerRTS } from 'rts.js';
 
 const cleanup = registerRTS({
   alias: {
@@ -58,8 +78,8 @@ import { formatDate } from '@utils/date';
 ### Custom Transformers
 
 ```typescript
-import { registerRTS } from 'rts';
-import type { TransformerHook } from 'rts';
+import { registerRTS } from 'rts.js';
+import type { TransformerHook } from 'rts.js';
 
 // Create a custom CSS transformer
 const CSSHook: TransformerHook = {
@@ -229,27 +249,6 @@ export const Button: React.FC<ButtonProps> = ({
   background-color: #6c757d;
   color: white;
 }
-```
-
-## Development
-
-### Prerequisites
-
-- Node.js >=16
-- npm or yarn
-
-### Setup
-
-```bash
-# Clone the repository
-git clone https://github.com/your-org/rts.git
-cd rts
-
-# Install dependencies
-npm install
-
-# Start development
-npm start
 ```
 
 ### Scripts
