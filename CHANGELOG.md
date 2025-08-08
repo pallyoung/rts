@@ -1,5 +1,12 @@
 # rts.js
 
+## 0.0.3
+
+### Patch Changes
+
+- 1. fix the bug of ModuleResolver.resolve context param null.
+  2. update the info of docs
+
 ## 0.0.2
 
 ### Patch Changes
