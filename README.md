@@ -1,6 +1,14 @@
 # RTS (Runtime Transformer System)
 
-A powerful Node.js runtime transformer that enables direct execution of TypeScript, JSX, TSX, and CSS files without requiring pre-compilation. Built with SWC for fast compilation and designed for seamless integration with Node.js module system.
+[![npm version](https://img.shields.io/npm/v/rts.js?color=cb3837&logo=npm)](https://www.npmjs.com/package/rts.js)
+[![npm downloads](https://img.shields.io/npm/dm/rts.js?logo=npm)](https://www.npmjs.com/package/rts.js)
+[![license](https://img.shields.io/npm/l/rts.js)](./LICENSE)
+
+
+[![stars](https://img.shields.io/github/stars/pallyoung/rts?style=social)](https://github.com/pallyoung/rts)
+[![PRs welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com/pallyoung/rts/pulls)
+
+ A powerful Node.js runtime transformer that enables direct execution of TypeScript, JSX, TSX, and CSS files without requiring pre-compilation. Built with SWC for fast compilation and designed for seamless integration with Node.js module system.
 
 > 📖 **中文文档**: [查看中文版 README](docs/zh/README.md)
 
