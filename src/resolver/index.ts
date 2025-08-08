@@ -176,7 +176,7 @@ export class ModuleResolver {
     specifier: string,
     context: ResolveHookContext,
   ): { url?: string } {
-    const cacheKey = `${specifier}:${context.parentURL}`;
+    const cacheKey = `${specifier}:${context?.parentURL ?? ""}`;
     let url = this.cache.get(cacheKey);
 
     if (!url) {
