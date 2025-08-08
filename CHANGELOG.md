@@ -1,5 +1,11 @@
 # rts.js
 
+## 0.0.2
+
+### Patch Changes
+
+- add register module for node -r runtime support
+
 ## 0.0.1
 
 ### Patch Changes
