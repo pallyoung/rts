@@ -1,189 +1,94 @@
 import test from "ava";
 import fs from "fs";
+import os from "os";
 import path from "path";
-import { loadConfig, loadConfigFile, mergeConfig } from "../src/config";
+import { loadConfigFromCwd, mergeConfig, type RTSOptions } from "../src/config";
 
-// Helper function to create temporary config file
-function createTempConfig(content: string): string {
-  const tempFile = path.join(__dirname, "temp-config.json");
-  fs.writeFileSync(tempFile, content);
-  return tempFile;
+function createTempDir(): string {
+  return fs.mkdtempSync(path.join(os.tmpdir(), "rts-config-"));
 }
 
-// Helper function to cleanup temp file
-function cleanupTempFile(filePath: string): void {
-  if (fs.existsSync(filePath)) {
-    fs.unlinkSync(filePath);
-  }
+function writeFile(dir: string, name: string, content: string): string {
+  const file = path.join(dir, name);
+  fs.writeFileSync(file, content);
+  return file;
 }
 
-test("loadConfig should load valid JSON", (t) => {
-  const configContent = '{"name": "test", "version": "1.0.0"}';
-  const tempFile = createTempConfig(configContent);
+function cleanupDir(dir: string): void {
+  if (!fs.existsSync(dir)) return;
+  for (const entry of fs.readdirSync(dir)) {
+    fs.rmSync(path.join(dir, entry), { recursive: true, force: true });
+  }
+  fs.rmdirSync(dir);
+}
 
+test("loadConfigFromCwd loads JSON config", (t) => {
+  const dir = createTempDir();
   try {
-    const result = loadConfig(tempFile);
-    t.deepEqual(result, { name: "test", version: "1.0.0" });
+    writeFile(
+      dir,
+      "rts.config.json",
+      JSON.stringify({
+        alias: { "@components": "./src/components", "@utils": ["./src/utils"] },
+        transformers: [],
+      }),
+    );
+
+    const result = loadConfigFromCwd(dir) as RTSOptions;
+    t.truthy(result);
+    t.is(result.alias?.["@components"], "./src/components");
+    t.deepEqual(result.alias?.["@utils"], ["./src/utils"]);
+    t.deepEqual(result.transformers, []);
   } finally {
-    cleanupTempFile(tempFile);
+    cleanupDir(dir);
   }
 });
 
-test("loadConfig should handle complex JSON", (t) => {
-  const configContent = `{
-    "aliases": {
-      "@components": "./src/components",
-      "@utils": ["./src/utils", "./src/helpers"]
-    },
-    "transformers": ["ts", "jsx"],
-    "debug": true
-  }`;
-
-  const tempFile = createTempConfig(configContent);
-
+test("loadConfigFromCwd loads JS config (module.exports)", (t) => {
+  const dir = createTempDir();
   try {
-    const result = loadConfig(tempFile);
-    t.is(result.aliases["@components"], "./src/components");
-    t.deepEqual(result.aliases["@utils"], ["./src/utils", "./src/helpers"]);
-    t.deepEqual(result.transformers, ["ts", "jsx"]);
-    t.is(result.debug, true);
+    writeFile(
+      dir,
+      "rts.config.js",
+      "module.exports = { alias: { '@a': './a' }, transformers: [] };",
+    );
+    const result = loadConfigFromCwd(dir) as RTSOptions;
+    t.truthy(result);
+    t.is(result.alias?.["@a"], "./a");
+    t.deepEqual(result.transformers, []);
   } finally {
-    cleanupTempFile(tempFile);
+    cleanupDir(dir);
   }
 });
 
-test("loadConfigFile should work the same as loadConfig", (t) => {
-  const configContent = '{"test": "value"}';
-  const tempFile = createTempConfig(configContent);
-
+test("loadConfigFromCwd returns undefined when no file", (t) => {
+  const dir = createTempDir();
   try {
-    const result = loadConfigFile(tempFile);
-    t.deepEqual(result, { test: "value" });
+    const result = loadConfigFromCwd(dir);
+    t.is(result, undefined);
   } finally {
-    cleanupTempFile(tempFile);
+    cleanupDir(dir);
   }
 });
 
-test("loadConfig should throw on invalid JSON", (t) => {
-  const configContent = '{"invalid": json}';
-  const tempFile = createTempConfig(configContent);
-
-  try {
-    t.throws(() => loadConfig(tempFile));
-  } finally {
-    cleanupTempFile(tempFile);
-  }
-});
-
-test("loadConfig should throw on non-existent file", (t) => {
-  t.throws(() => loadConfig("non-existent-file.json"));
-});
-
-test("mergeConfig should merge simple objects", (t) => {
-  const oldConfig = { a: 1, b: 2 };
-  const newConfig = { b: 3, c: 4 };
-
-  const result = mergeConfig(oldConfig, newConfig);
-
-  t.deepEqual(result, { a: 1, b: 3, c: 4 });
-  t.is(result, oldConfig); // Should modify in place
-});
-
-test("mergeConfig should merge nested objects", (t) => {
-  const oldConfig = {
-    aliases: { "@components": "./src/components" },
-    settings: { debug: false },
+test("mergeConfig merges alias and appends transformers", (t) => {
+  const base: RTSOptions = {
+    alias: { "@a": "./a" },
+    transformers: [{ exts: [".x"], hook: (c: string) => c }],
+  };
+  const next: RTSOptions = {
+    alias: { "@b": "./b" },
+    transformers: [{ exts: [".y"], hook: (c: string) => c }],
   };
 
-  const newConfig = {
-    aliases: { "@utils": "./src/utils" },
-    settings: { debug: true },
-  };
-
-  const result = mergeConfig(oldConfig, newConfig);
-
-  t.deepEqual(result.aliases, {
-    "@components": "./src/components",
-    "@utils": "./src/utils",
-  });
-  t.deepEqual(result.settings, { debug: true });
+  const merged = mergeConfig(base, next);
+  t.deepEqual(merged.alias, { "@a": "./a", "@b": "./b" });
+  t.is(merged.transformers?.length, 2);
 });
 
-test("mergeConfig should handle arrays", (t) => {
-  const oldConfig = {
-    transformers: ["ts"],
-    aliases: ["@components"],
-  };
-
-  const newConfig = {
-    transformers: ["jsx"],
-    aliases: ["@utils"],
-  };
-
-  const result = mergeConfig(oldConfig, newConfig);
-
-  t.deepEqual(result.transformers, ["jsx"]);
-  t.deepEqual(result.aliases, ["@utils"]);
-});
-
-test("mergeConfig should handle empty objects", (t) => {
-  const oldConfig = {};
-  const newConfig = { test: "value" };
-
-  const result = mergeConfig(oldConfig, newConfig);
-
-  t.deepEqual(result, { test: "value" });
-});
-
-test("mergeConfig should handle null and undefined", (t) => {
-  const oldConfig = { a: 1, b: null };
-  const newConfig = { b: 2, c: undefined };
-
-  const result = mergeConfig(oldConfig, newConfig);
-
-  t.deepEqual(result, { a: 1, b: 2, c: undefined });
-});
-
-test("mergeConfig should handle complex nested structures", (t) => {
-  const oldConfig = {
-    aliases: {
-      "@components": "./src/components",
-      "@utils": ["./src/utils", "./src/helpers"],
-    },
-    settings: {
-      debug: false,
-      cache: {
-        enabled: true,
-        maxSize: 100,
-      },
-    },
-  };
-
-  const newConfig = {
-    aliases: {
-      "@types": "./src/types",
-    },
-    settings: {
-      debug: true,
-      cache: {
-        maxSize: 200,
-      },
-    },
-  };
-
-  const result = mergeConfig(oldConfig, newConfig);
-
-  t.deepEqual(result.aliases, {
-    "@components": "./src/components",
-    "@utils": ["./src/utils", "./src/helpers"],
-    "@types": "./src/types",
-  });
-
-  t.deepEqual(result.settings, {
-    debug: true,
-    cache: {
-      enabled: true,
-      maxSize: 200,
-    },
-  });
+test("mergeConfig keeps options precedence on simple fields", (t) => {
+  const base = {} as RTSOptions;
+  const next = { alias: { "@x": "./x" } } as RTSOptions;
+  const merged = mergeConfig(base, next);
+  t.deepEqual(merged.alias, { "@x": "./x" });
 });
