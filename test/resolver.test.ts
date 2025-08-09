@@ -1,5 +1,6 @@
 import test from "ava";
 import fs from "fs";
+import os from "os";
 import path from "path";
 import { ModuleResolver, type TransformerHook } from "../src/resolver";
 
@@ -132,7 +133,12 @@ test("register should set up hooks and work with actual module resolution", (t) 
 
   try {
     // Create a test file
-    const testFilePath = path.join(__dirname, "temp", "test.custom");
+    const testFilePath = path.join(
+      os.tmpdir(),
+      "rts-tests",
+      "resolver",
+      "test.custom",
+    );
     const testFileDir = path.dirname(testFilePath);
 
     if (!fs.existsSync(testFileDir)) {
@@ -146,7 +152,12 @@ test("register should set up hooks and work with actual module resolution", (t) 
     t.is(testModule, "test content");
   } finally {
     resolver.revert();
-    const testFilePath = path.join(__dirname, "temp", "test.custom");
+    const testFilePath = path.join(
+      os.tmpdir(),
+      "rts-tests",
+      "resolver",
+      "test.custom",
+    );
     if (fs.existsSync(testFilePath)) {
       fs.unlinkSync(testFilePath);
     }
@@ -175,7 +186,12 @@ test("revert should clean up hooks and restore normal behavior", (t) => {
 
   try {
     // Create a test file
-    const testFilePath = path.join(__dirname, "temp", "test-revert.custom");
+    const testFilePath = path.join(
+      os.tmpdir(),
+      "rts-tests",
+      "resolver",
+      "test-revert.custom",
+    );
     const testFileDir = path.dirname(testFilePath);
 
     if (!fs.existsSync(testFileDir)) {
@@ -184,7 +200,7 @@ test("revert should clean up hooks and restore normal behavior", (t) => {
 
     fs.writeFileSync(testFilePath, "test content");
     // Test that transformer works
-    const testModule1 = require("./temp/test-revert.custom");
+    const testModule1 = require(testFilePath);
     t.is(testModule1, "test content");
 
     // Revert hooks
@@ -195,7 +211,12 @@ test("revert should clean up hooks and restore normal behavior", (t) => {
     // We'll just test that revert doesn't throw
     t.notThrows(() => resolver.revert());
   } finally {
-    const testFilePath = path.join(__dirname, "temp", "test-revert.custom");
+    const testFilePath = path.join(
+      os.tmpdir(),
+      "rts-tests",
+      "resolver",
+      "test-revert.custom",
+    );
     if (fs.existsSync(testFilePath)) {
       fs.unlinkSync(testFilePath);
     }
@@ -244,7 +265,12 @@ test("ModuleResolver should work with multiple transformers", (t) => {
 
   try {
     // Create test files
-    const testDir = path.join(__dirname, "temp", "multi-transform");
+    const testDir = path.join(
+      os.tmpdir(),
+      "rts-tests",
+      "resolver",
+      "multi-transform",
+    );
     if (!fs.existsSync(testDir)) {
       fs.mkdirSync(testDir, { recursive: true });
     }
@@ -264,7 +290,12 @@ test("ModuleResolver should work with multiple transformers", (t) => {
     t.truthy(jsModule);
   } finally {
     resolver.revert();
-    const testDir = path.join(__dirname, "temp", "multi-transform");
+    const testDir = path.join(
+      os.tmpdir(),
+      "rts-tests",
+      "resolver",
+      "multi-transform",
+    );
     if (fs.existsSync(testDir)) {
       fs.rmSync(testDir, { recursive: true, force: true });
     }
@@ -297,7 +328,13 @@ test("ModuleResolver should handle alias resolution with transformers", (t) => {
 
   try {
     // Create test directory structure
-    const componentsDir = path.join(__dirname, "temp", "src", "components");
+    const componentsDir = path.join(
+      os.tmpdir(),
+      "rts-tests",
+      "resolver",
+      "src",
+      "components",
+    );
     if (!fs.existsSync(componentsDir)) {
       fs.mkdirSync(componentsDir, { recursive: true });
     }
@@ -311,7 +348,7 @@ test("ModuleResolver should handle alias resolution with transformers", (t) => {
     t.pass();
   } finally {
     resolver.revert();
-    const tempDir = path.join(__dirname, "temp", "src");
+    const tempDir = path.join(os.tmpdir(), "rts-tests", "resolver", "src");
     if (fs.existsSync(tempDir)) {
       fs.rmSync(tempDir, { recursive: true, force: true });
     }
@@ -367,7 +404,12 @@ test("ModuleResolver should handle transformer priority correctly", (t) => {
 
   try {
     // Create test files with different extensions
-    const testDir = path.join(__dirname, "temp", "priority-test");
+    const testDir = path.join(
+      os.tmpdir(),
+      "rts-tests",
+      "resolver",
+      "priority-test",
+    );
     if (!fs.existsSync(testDir)) {
       fs.mkdirSync(testDir, { recursive: true });
     }
@@ -386,7 +428,12 @@ test("ModuleResolver should handle transformer priority correctly", (t) => {
     t.truthy(customModule);
   } finally {
     resolver.revert();
-    const testDir = path.join(__dirname, "temp", "priority-test");
+    const testDir = path.join(
+      os.tmpdir(),
+      "rts-tests",
+      "resolver",
+      "priority-test",
+    );
     if (fs.existsSync(testDir)) {
       fs.rmSync(testDir, { recursive: true, force: true });
     }
