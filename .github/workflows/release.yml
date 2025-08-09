@@ -40,6 +40,9 @@ jobs:
 
       - name: Changesets - Version or Publish
         uses: changesets/action@v1
+        with:
+          version: pnpm run changeset:version
+          publish: pnpm run changeset:publish
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
