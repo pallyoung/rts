@@ -1,40 +1,16 @@
 import test from "ava";
 import fs from "fs";
+import os from "os";
 import path from "path";
 import { registerRTS } from "../src/index";
 
-// Helper function to create temporary test files
-function createTempFile(content: string, filename: string): string {
-  const tempDir = path.join(__dirname, "temp");
-  if (!fs.existsSync(tempDir)) {
-    fs.mkdirSync(tempDir, { recursive: true });
-  }
-
-  const filePath = path.join(tempDir, filename);
-  fs.writeFileSync(filePath, content);
-  return filePath;
-}
-
 // Helper function to cleanup temp files
 function cleanupTempFiles(): void {
-  const tempDir = path.join(__dirname, "temp");
+  const tempDir = path.join(os.tmpdir(), "rts-tests", "integration");
   if (fs.existsSync(tempDir)) {
     try {
-      // Try to remove files first
-      const files = fs.readdirSync(tempDir);
-      for (const file of files) {
-        const filePath = path.join(tempDir, file);
-        try {
-          fs.unlinkSync(filePath);
-        } catch (error) {
-          // Ignore errors for individual files
-        }
-      }
-      // Then try to remove the directory
-      fs.rmdirSync(tempDir);
-    } catch (error) {
-      // Ignore errors for directory removal
-    }
+      fs.rmSync(tempDir, { recursive: true, force: true });
+    } catch {}
   }
 }
 

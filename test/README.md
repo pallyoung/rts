@@ -8,7 +8,6 @@ This directory contains comprehensive unit and integration tests for the RTS (Ru
 
 ```
 test/
-├── temp/                    # Temporary test files (auto-cleaned)
 ├── index.test.ts           # Main functionality tests
 ├── resolver.test.ts        # Module resolver tests
 ├── transformer.test.ts     # Transformer tests
@@ -115,18 +114,18 @@ The RTS system uses a unified architecture where:
 
 ## Temporary Files
 
-### `test/temp/` Directory
+### System Temporary Directory
 
-All temporary test files are created in the `test/temp/` directory:
+All temporary test files are created under the system temporary directory (Node `os.tmpdir()`), e.g. `.../rts-tests/...`:
 - Automatically cleaned up after tests
-- Excluded from git tracking
+- Works across Windows and Linux
 - Used for file system tests and fixtures
 - Supports nested directory structures
 
 ### File Management
 
 Tests follow these guidelines for temporary files:
-- Create files in `test/temp/` subdirectories
+- Create files under `os.tmpdir()` with `rts-tests` prefix and subdirectories per suite
 - Use descriptive file names
 - Clean up files in `finally` blocks
 - Handle file system errors gracefully
