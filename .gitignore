@@ -17,7 +17,6 @@ test-module.js
 temp-config.json
 
 # Changeset files (keep README.md but ignore individual changeset files)
-.changeset/*.md
 !.changeset/README.md
 
 # IDE and editor files
