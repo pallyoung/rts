@@ -38,6 +38,9 @@ jobs:
       - name: Test
         run: pnpm run --if-present test
 
+      - name: Version
+        run: pnpm run changeset:version
+
       - name: Publish with Changesets (pnpm)
         run: pnpm run changeset:publish
         env:
