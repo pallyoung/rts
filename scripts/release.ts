@@ -238,45 +238,6 @@ function createGitTag(config: ReleaseConfig): void {
 }
 
 /**
- * Push changes to git
- */
-function pushToGit(): void {
-  console.log("📤 Pushing changes to git...");
-  try {
-    execSync("git add .", { stdio: "inherit" });
-    execSync('git commit -m "chore: release"', { stdio: "inherit" });
-    execSync("git push", { stdio: "inherit" });
-    console.log("✅ Changes pushed to git");
-  } catch (error) {
-    console.error("❌ Failed to push to git");
-    process.exit(1);
-  }
-}
-
-/**
- * Clean up changeset files
- */
-function cleanupChangesetFiles(): void {
-  console.log("🧹 Cleaning up changeset files...");
-  try {
-    const changesetDir = ".changeset";
-    if (fs.existsSync(changesetDir)) {
-      const files = fs
-        .readdirSync(changesetDir)
-        .filter((file) => file.endsWith(".md") && file !== "README.md");
-
-      files.forEach((file) => {
-        fs.unlinkSync(path.join(changesetDir, file));
-      });
-    }
-    console.log("✅ Changeset files cleaned up");
-  } catch (error) {
-    console.error("❌ Failed to clean up changeset files");
-    process.exit(1);
-  }
-}
-
-/**
  * Main release function
  */
 function release(config: ReleaseConfig): void {
@@ -307,12 +268,6 @@ function release(config: ReleaseConfig): void {
 
       // Publish to npm
       publishToNpm(config);
-      // Push changes to git
-      pushToGit();
-      cleanupChangesetFiles();
-
-      // Create git tag for the release
-      createGitTag(config);
     }
 
     console.log("🎉 Release completed successfully!");
@@ -374,7 +329,6 @@ Examples:
   pnpm run release --dry-run   # Dry run
   pnpm run release init        # Initialize changeset
   pnpm run release --skip-build # Skip build step
-  pnpm run release tag         # Create git tag
 `);
   process.exit(1);
 }
